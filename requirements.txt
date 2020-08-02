@@ -1,0 +1,3 @@
+xlrd
+db-sqlite3
+openpyxl
