@@ -20,7 +20,7 @@ def getOldTable(val):
     # conv = lambda i : i or '' 
     valX = ['' if v is None else v for v in valX]
     print(valX)
-    sheet['E8'] = valX[1]
+    sheet['E8'] = "AKS"+str(valX[1])
     sheet['F8'] = valX[0]
     sheet['C7'] = valX[2]
     sheet['C8'] = valX[3]
@@ -30,6 +30,7 @@ def getOldTable(val):
     sheet['C13'] = valX[7]
     sheet['C14'] = valX[8]
     sheet['C15'] = valX[9]
+    sheet['B16'] = f"Minimum charges for the repair are: {valX[10]}"
 
 
 def createNewTable():
@@ -45,7 +46,7 @@ def createNewTable():
     print(orderNumber)
     # orderNumber = 1
     sheet['E8'] = orderDate
-    sheet['F8'] = orderNumber
+    sheet['F8'] = "AKS"+str(orderNumber)
     ClientName = input("*Client Name: ")
     sheet['C7'] = ClientName
     ClientPhone = input("Client Phone Number: ")
@@ -62,9 +63,10 @@ def createNewTable():
     sheet['C14'] = ProblemDiagnosed
     AdditionalComments = input("Additional Comments: ")
     sheet['C15'] = AdditionalComments
-    
-    q = f'''INSERT INTO jobTask (jobNumber, orderDate, clientName, clientNumber, clientEmail, itemRecieved, modelNumber, ProblemReported, ProblemDiagnosed, AdditionalComments) VALUES (?,?,?,?,?,?,?,?,?,?)'''
-    vals = (orderNumber,orderDate,ClientName,ClientPhone,ClientEmail,ItemRcvd,ModelNumber,ProblemReported,ProblemDiagnosed,AdditionalComments)
+    MinimumCharges = input("Minimum Charges: ")
+    sheet['B16'] = f"Minimum charges for the repair are: {MinimumCharges}"
+    q = f'''INSERT INTO jobTask (jobNumber, orderDate, clientName, clientNumber, clientEmail, itemRecieved, modelNumber, ProblemReported, ProblemDiagnosed, AdditionalComments,minimumCharges) VALUES (?,?,?,?,?,?,?,?,?,?,?)'''
+    vals = (orderNumber,orderDate,ClientName,ClientPhone,ClientEmail,ItemRcvd,ModelNumber,ProblemReported,ProblemDiagnosed,AdditionalComments,int(MinimumCharges))
     x = c.execute(q,vals)
     conn.commit()
 
