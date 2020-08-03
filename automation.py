@@ -17,11 +17,13 @@ def getOldTable(val):
     x = c.execute(q)
     valX = x.fetchall()[0]
     valX = list(valX)
+    print(valX)
     # conv = lambda i : i or '' 
     valX = ['' if v is None else v for v in valX]
     print(valX)
-    sheet['E8'] = "AKS"+str(valX[1])
-    sheet['F8'] = valX[0]
+    sheet['E8'] = valX[1]
+    '''ChangeLine'''
+    sheet['F8'] = "AKS-"+str(valX[0])
     sheet['C7'] = valX[2]
     sheet['C8'] = valX[3]
     sheet['C9'] = valX[4]
@@ -46,7 +48,8 @@ def createNewTable():
     print(orderNumber)
     # orderNumber = 1
     sheet['E8'] = orderDate
-    sheet['F8'] = "AKS"+str(orderNumber)
+    '''changeLine'''
+    sheet['F8'] = "AKS-"+str(orderNumber)
     ClientName = input("*Client Name: ")
     sheet['C7'] = ClientName
     ClientPhone = input("Client Phone Number: ")
