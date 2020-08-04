@@ -102,7 +102,7 @@ def createNewTable():
     sheet['F11'] = "Pending"
     advanceRecieved = int(input("Advance Recieved: "))
     sheet['F10'] = advanceRecieved
-    q = f'''INSERT INTO jobTask (jobNumber, orderDate, clientName, clientNumber, clientEmail, itemRecieved, modelNumber, ProblemReported, ProblemDiagnosed, AdditionalComments,minimumCharges,workDetail,advanceRecieved) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?1)'''
+    q = f'''INSERT INTO jobTask (jobNumber, orderDate, clientName, clientNumber, clientEmail, itemRecieved, modelNumber, ProblemReported, ProblemDiagnosed, AdditionalComments,minimumCharges,workDetail,advanceRecieved) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'''
     vals = (orderNumber,orderDate,ClientName,ClientPhone,ClientEmail,ItemRcvd,ModelNumber,ProblemReported,ProblemDiagnosed,AdditionalComments,int(MinimumCharges),"Pending",advanceRecieved)
     x = c.execute(q,vals)
     conn.commit()
