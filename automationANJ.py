@@ -205,7 +205,21 @@ def createNewTable():
     conn.commit()
     c.close()
     conn.close()
+    phoneNum = '91'+ str(ClientPhone)
     '''sendMessage'''
+    message = '''Dear {}
+Thanks for visiting *Computer City India*
+We have assigned Job Number: *{}* for the item: *{}* on {}
+Minimum charges for the same is Rs.{} and we have recieved advance of Rs.{}
+We will update you timely as per progress of this job
+'''.format(ClientName,"ANJ-"+str(orderNumber),ItemRcvd,orderDate, MinimumCharges, advanceRecieved)
+
+    link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(phoneNum)
+    #driver  = webdriver.Chrome()
+    driver.get(link)
+    print("Sending message to", phoneNum[2:])
+    send_unsaved_contact_message(message)
+    # send_unsaved_contact_message()
 
 def send_unsaved_contact_message(message):
     # global message
