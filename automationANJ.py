@@ -4,6 +4,21 @@ import sqlite3
 import subprocess
 from openpyxl import load_workbook
 today = date.today()
+import schedule
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
+import time
+import datetime
+import os
+import argparse
+
+
 
 # def queryOldTable():
 
@@ -190,15 +205,36 @@ def createNewTable():
     conn.commit()
     c.close()
     conn.close()
+    '''sendMessage'''
 
-
-
+def send_unsaved_contact_message(message):
+    # global message
+    global driver
+    try:
+        time.sleep(7)
+        input_box = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[2]/div/div[2]')
+        for ch in message:
+            if ch == "\n":
+                ActionChains(driver).key_down(Keys.SHIFT).key_down(Keys.ENTER).key_up(Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.BACKSPACE).perform()
+            else:
+                input_box.send_keys(ch)
+        input_box.send_keys(Keys.ENTER)
+        print("Message sent successfuly")
+    except NoSuchElementException:
+        print("Failed to send message")
+        return
     
 file = 'template.xlsx'
 rb = load_workbook(file)
 # r_sheet = rb.sheet_by_index(0)
 sheet = rb.active
-
+chrome_options = Options()
+chrome_options.add_argument('no-sandbox')
+# chrome_options.add_argument('--headless')
+chrome_options.add_argument("--user-data-dir=chrome-data")
+driver = webdriver.Chrome(r'chromedriver.exe',options=chrome_options)
+driver.get('https://web.whatsapp.com')
+wait = WebDriverWait(driver, 600)
 # wb = copy(rb)
 # wb_sheet = wb.get_sheet(0)
 while True:
@@ -206,7 +242,8 @@ while True:
     Enter 2 for old file Query
     Enter 3 for Deleting Record
     Enter 4 for Pending Records
-    Enter 5 for Editing Record:  ''')
+    Enter 5 for Editing Record
+    Enter 6 for Sending Update:   ''')
 
     if queryA=='1':
         createNewTable()
@@ -231,5 +268,42 @@ while True:
         editRecord(a)
         rb.save("newBill.xlsx")
         subprocess.Popen("newBill.xlsx",shell=True)
+    elif queryA=='6':
+        val = int(input("Enter jobNumber: "))
+        
+        q = f'''SELECT * FROM jobTask j where j.jobNumber={val}'''
+        conn = sqlite3.connect('cciAutomation.db')
+        c = conn.cursor()
+        x = c.execute(q)
+        valX = x.fetchall()[0]
+        valX = list(valX)
+        print(valX)
+        id = "ANJ-"+ str(valX[0])
+        phoneNum = '91'+valX[3]
+        print(id,phoneNum)
+        b = input("Enter the Message to be sent: ")
+
+        message = '''Update from *Computer City India*
+Regarding your Job Number: *{}* 
+
+{}'''.format(id,b)
+
+        link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(phoneNum)
+        #driver  = webdriver.Chrome()
+        driver.get(link)
+        print("Sending message to", phoneNum[2:])
+        send_unsaved_contact_message(message)
+
+        # messageBox = '//*[@id="main"]/footer/div[1]/div[2]/div/div[2]'
+        # phoneNum = "91"+str(input("Enter Phone Number: "))
+        
+        # link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(phoneNum)
+        # driver.get(link)
+        # time.sleep(20)
+        # textbox = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[2]').send_keys(b + Keys.ENTER)
+        
+        # print('91'+ valX[0])
+        # clientNumber
+
         # if updateRecordX=='Y' or updateRecordX=='y':
         #     updateRecord(val)
