@@ -179,7 +179,7 @@ def createNewTable():
     sheet['F8'] = "aks-"+str(orderNumber)
     ClientName = input("*Client Name: ")
     sheet['C7'] = ClientName
-    ClientPhone = input("Client Phone Number: ")
+    ClientPhone = input("Client Whatsapp Number: ")
     sheet['C8'] = ClientPhone
     ClientEmail = input("Client Email: ")
     sheet['C9'] = ClientEmail
