@@ -9,12 +9,11 @@ today = date.today()
 conn = sqlite3.connect('cciAutomation.db')
 
 ProfileTable = '''CREATE TABLE Profile (
-    userNumber   VARCHAR (200) PRIMARY KEY,
+    userNumber   BIGINT        PRIMARY KEY,
     clientName   VARCHAR       NOT NULL,
     clientNumber VARCHAR       UNIQUE
                                NOT NULL,
-    clientEmail  STRING        NOT NULL
-                               UNIQUE
+    clientEmail  STRING        
 );'''
 
 jobTask_Profile_RelationshipTable = '''CREATE TABLE jobTask_Profile_Relationship (
@@ -22,8 +21,11 @@ jobTask_Profile_RelationshipTable = '''CREATE TABLE jobTask_Profile_Relationship
     userNumber
 );
 '''
-c = conn.execute(ProfileTable)
-c2 = conn.execute(jobTask_Profile_RelationshipTable)
+try:
+    c = conn.execute(ProfileTable)
+    c2 = conn.execute(jobTask_Profile_RelationshipTable)
+except:
+    print("Already Created Tables")
 # conn.commit()
 # conn = sqlite3.connect('cciAutomation.db')
 queryGetUsers = '''SELECT jobNumber, clientName,clientNumber,clientEmail FROM jobTask'''
@@ -57,4 +59,4 @@ for i in valX:
         vals = (i[0],num)
         x = conn.execute(relationship,vals)
 conn.commit()
-    
+input("hello")

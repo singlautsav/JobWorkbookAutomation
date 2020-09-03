@@ -58,7 +58,7 @@ def editRecord(val):
     valX = list(valX)
     sheet['E8'] = valX[1]
     '''ChangeLine'''
-    sheet['F8'] = "aks-"+str(valX[0])
+    sheet['F8'] = "AKS-"+str(valX[0])
     valX = valX[2:]
     # valX = ['' if v is None else v for v in valX]
     listX = [None if v is '' else v for v in listX]
@@ -107,7 +107,6 @@ def updateRecord(val):
     conn.close()
 
 
-
 def deleteARecord(val):
     q= f''' DELETE FROM jobTask where jobNumber ={val}'''
     conn = sqlite3.connect('cciAutomation.db')
@@ -116,6 +115,7 @@ def deleteARecord(val):
     conn.commit()
     c.close()
     conn.close()
+
 
 def getPendingRecords():
     f = open("pendingStuff.txt","w+")
@@ -133,6 +133,7 @@ def getPendingRecords():
     c.close()
     conn.close()
 
+
 def getOldTable(val):
     q = f'''SELECT * FROM jobTask j where j.jobNumber={val}'''
     conn = sqlite3.connect('cciAutomation.db')
@@ -146,7 +147,7 @@ def getOldTable(val):
     print(valX)
     sheet['E8'] = valX[1]
     '''ChangeLine'''
-    sheet['F8'] = "aks-"+str(valX[0])
+    sheet['F8'] = "AKS-"+str(valX[0])
     sheet['C7'] = valX[2]
     sheet['C8'] = valX[3]
     sheet['C9'] = valX[4]
@@ -176,13 +177,34 @@ def createNewTable():
     # orderNumber = 1
     sheet['E8'] = orderDate
     '''changeLine'''
-    sheet['F8'] = "aks-"+str(orderNumber)
-    ClientName = input("*Client Name: ")
-    sheet['C7'] = ClientName
+    sheet['F8'] = "AKS-"+str(orderNumber)
     ClientPhone = input("Client Whatsapp Number: ")
-    sheet['C8'] = ClientPhone
-    ClientEmail = input("Client Email: ")
-    sheet['C9'] = ClientEmail
+    qX = f'''SELECT clientNumber,clientName,clientEmail from Profile p where p.clientNumber = {ClientPhone}'''
+    x = conn.execute(qX)
+    valZ = x.fetchall()
+    print(valZ)
+    # print(len(valZ))
+    if len(valZ)==0:
+        ClientName = input("*Client Name: ")
+        sheet['C7'] = ClientName
+        sheet['C8'] = ClientPhone
+        ClientEmail = input("Client Email: ")
+        sheet['C9'] = ClientEmail
+        getMax = '''SELECT MAX(userNumber) FROM Profile'''
+        xnew = conn.execute(getMax)
+        num = int(xnew.fetchall()[0][0])+1
+        q = f'''INSERT INTO Profile (userNumber,clientName,clientNumber,clientEmail) VALUES (?,?,?,?)'''
+        vals = (num,ClientName,ClientPhone,ClientEmail)
+        x = conn.execute(q,vals)
+    else:
+        valZ = list(valZ[0])
+        num = valZ[0]
+        ClientName = valZ[1]
+        sheet['C7'] = ClientName
+        ClientEmail = valZ[2]
+        sheet['C9'] = ClientEmail
+        sheet['C8'] = ClientPhone
+
     ItemRcvd = input("*Item Recieved: ")
     sheet['C10'] = ItemRcvd
     ModelNumber = input("*Model Number: ")
@@ -202,6 +224,9 @@ def createNewTable():
     q = f'''INSERT INTO jobTask (jobNumber, orderDate, clientName, clientNumber, clientEmail, itemRecieved, modelNumber, ProblemReported, ProblemDiagnosed, AdditionalComments,minimumCharges,workDetail,advanceRecieved) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'''
     vals = (orderNumber,orderDate,ClientName,ClientPhone,ClientEmail,ItemRcvd,ModelNumber,ProblemReported,ProblemDiagnosed,AdditionalComments,int(MinimumCharges),"Pending",advanceRecieved)
     x = c.execute(q,vals)
+    relationship= f'''INSERT INTO jobTask_Profile_Relationship (jobNumber,userNumber) VALUES(?,?)'''
+    vals = (orderNumber,num)
+    x = conn.execute(relationship,vals)
     conn.commit()
     c.close()
     conn.close()
@@ -212,7 +237,7 @@ Thanks for visiting *Computer City India*
 We have assigned Job Number: *{}* for the item: *{}* on {}
 Minimum charges for the same is Rs.{} and we have recieved advance of Rs.{}
 We will update you timely as per progress of this job
-'''.format(ClientName,"aks-"+str(orderNumber),ItemRcvd,orderDate, MinimumCharges, advanceRecieved)
+'''.format(ClientName,"AKS-"+str(orderNumber),ItemRcvd,orderDate, MinimumCharges, advanceRecieved)
 
     link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(phoneNum)
     #driver  = webdriver.Chrome()
@@ -221,7 +246,7 @@ We will update you timely as per progress of this job
     send_unsaved_contact_message(message)
     # send_unsaved_contact_message()
 
-def send_unsaved_contact_message(message):
+def send_unsaved_contact_message(message,num):
     # global message
     global driver
     try:
@@ -232,11 +257,19 @@ def send_unsaved_contact_message(message):
                 ActionChains(driver).key_down(Keys.SHIFT).key_down(Keys.ENTER).key_up(Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.BACKSPACE).perform()
             else:
                 input_box.send_keys(ch)
-        input_box.send_keys(Keys.ENTER)
+        # input_box.send_keys(Keys.ENTER)
         print("Message sent successfuly")
-    except NoSuchElementException:
-        print("Failed to send message")
         return
+    except:
+        # print(e.)
+        print("Failed to send message, retrying")
+        if num==6:
+            print('Kuchh toh gadbad h, cannot perform more tries')
+            return
+        else:
+            send_unsaved_contact_message(message,num+1)
+            return    
+    return
     
 file = 'template.xlsx'
 rb = load_workbook(file)
@@ -292,32 +325,18 @@ while True:
         valX = x.fetchall()[0]
         valX = list(valX)
         print(valX)
-        id = "aks-"+ str(valX[0])
+        id = "AKS-"+ str(valX[0])
         phoneNum = '91'+valX[3]
         print(id,phoneNum)
         b = input("Enter the Message to be sent: ")
 
         message = '''Update from *Computer City India*
-Regarding your Job Number: *{}* 
-
-{}'''.format(id,b)
+Your job- {} is under Process 
+{}
+'''.format(id,b)
 
         link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(phoneNum)
         #driver  = webdriver.Chrome()
         driver.get(link)
         print("Sending message to", phoneNum[2:])
-        send_unsaved_contact_message(message)
-
-        # messageBox = '//*[@id="main"]/footer/div[1]/div[2]/div/div[2]'
-        # phoneNum = "91"+str(input("Enter Phone Number: "))
-        
-        # link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(phoneNum)
-        # driver.get(link)
-        # time.sleep(20)
-        # textbox = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[2]').send_keys(b + Keys.ENTER)
-        
-        # print('91'+ valX[0])
-        # clientNumber
-
-        # if updateRecordX=='Y' or updateRecordX=='y':
-        #     updateRecord(val)
+        send_unsaved_contact_message(message,0)

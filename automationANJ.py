@@ -264,6 +264,7 @@ def send_unsaved_contact_message(message,num):
         # print(e.)
         print("Failed to send message, retrying")
         if num==6:
+            print('Kuchh toh gadbad h, cannot perform more tries')
             return
         else:
             send_unsaved_contact_message(message,num+1)
