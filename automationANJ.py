@@ -243,7 +243,7 @@ We will update you timely as per progress of this job
     #driver  = webdriver.Chrome()
     driver.get(link)
     print("Sending message to", phoneNum[2:])
-    send_unsaved_contact_message(message)
+    send_unsaved_contact_message(message,0)
     # send_unsaved_contact_message()
 
 def send_unsaved_contact_message(message,num):
@@ -257,7 +257,7 @@ def send_unsaved_contact_message(message,num):
                 ActionChains(driver).key_down(Keys.SHIFT).key_down(Keys.ENTER).key_up(Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.BACKSPACE).perform()
             else:
                 input_box.send_keys(ch)
-        # input_box.send_keys(Keys.ENTER)
+        input_box.send_keys(Keys.ENTER)
         print("Message sent successfuly")
         return
     except:
